@@ -5,6 +5,7 @@ defmodule NSQ.Connection.Initializer do
   alias NSQ.ConnInfo
   import NSQ.Protocol
   require Logger
+  @json Application.get_env(:elixir_nsq, :json_module)
 
   @socket_opts [as: :binary, mode: :passive, packet: :raw]
 
@@ -126,7 +127,7 @@ defmodule NSQ.Connection.Initializer do
 
   @spec update_from_identify_response(C.state, binary) :: {:ok, C.state}
   defp update_from_identify_response(conn_state, json) do
-    {:ok, parsed} = Poison.decode(json)
+    {:ok, parsed} = @json.decode(json)
 
     # respect negotiated max_rdy_count
     if parsed["max_rdy_count"] do

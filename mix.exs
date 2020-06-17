@@ -16,7 +16,7 @@ defmodule ElixirNsq.Mixfile do
   #
   # Type "mix help compile.app" for more information
   def application do
-    [applications: [:logger, :httpotion, :poison, :socket]]
+    [applications: [:logger, :socket, :mojito]]
   end
 
   # Dependencies can be Hex packages:
@@ -30,8 +30,9 @@ defmodule ElixirNsq.Mixfile do
   # Type "mix help deps" for more examples and options
   defp deps do
     [
-      {:poison, "~> 3.0"},
-      {:httpotion, "~> 3.1"},
+      {:jason, "~> 1.0"},
+      {:mojito, "~> 0.7"},
+
       {:elixir_uuid, "~> 1.2"},
       {:socket, "~> 0.3.1"},
 

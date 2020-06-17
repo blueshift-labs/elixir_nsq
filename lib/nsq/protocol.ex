@@ -1,4 +1,6 @@
 defmodule NSQ.Protocol do
+  @json Application.get_env(:elixir_nsq, :json_module)
+
   @valid_topic_channel_name_regex ~r/^[\.a-zA-Z0-9_-]+(#ephemeral)?$/
   @frame_type_response <<0 :: size(32)>>
   @frame_type_error <<1 :: size(32)>>
@@ -13,7 +15,7 @@ defmodule NSQ.Protocol do
       :magic_v2 -> "  V2"
       :noop -> "NOP\n"
       {:identify, options} ->
-        json = Poison.encode!(options)
+        json = @json.encode!(options)
         "IDENTIFY\n" <> <<byte_size(json) :: size(32)>> <> json
       {:auth, secret_key} ->
         "AUTH\n" <> <<byte_size(secret_key) :: size(32)>> <> secret_key

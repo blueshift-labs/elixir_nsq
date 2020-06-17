@@ -1,4 +1,6 @@
 defmodule NSQ.Lookupd do
+  @json Application.get_env(:elixir_nsq, :json_module)
+  @http Application.get_env(:elixir_nsq, :http_module)
   alias NSQ.Connection, as: C
   require Logger
 
@@ -39,20 +41,20 @@ defmodule NSQ.Lookupd do
     lookupd_url = "http://#{host}:#{port}/lookup?topic=#{topic}"
     headers = [{"Accept", "application/vnd.nsq; version=1.0"}]
 
-    case HTTPotion.get(lookupd_url, headers: headers) do
-      %HTTPotion.Response{status_code: 200, body: body, headers: headers} ->
+    case @http.get(lookupd_url, headers) do
+      {:ok, %{status_code: 200, body: body, headers: headers}} ->
         normalize_200_response(headers, body)
 
-      %HTTPotion.Response{status_code: 404} ->
+      {:ok, %{status_code: 404}} ->
         %{} |> normalize_response
 
-      %HTTPotion.Response{status_code: status, body: body} ->
+      {:ok, %{status_code: status, body: body}} ->
         Logger.error("Unexpected status code from #{lookupd_url}: #{status}")
 
         %{status_code: status, data: body}
         |> normalize_response
 
-      %HTTPotion.ErrorResponse{} = error ->
+     {:error, error} ->
         Logger.error("Error connecting to #{lookupd_url}: #{inspect(error)}")
         normalize_response(%{})
     end
@@ -62,8 +64,13 @@ defmodule NSQ.Lookupd do
   defp normalize_200_response(headers, body) do
     body = if body == nil || body == "", do: "{}", else: body
 
-    if headers[:"X-Nsq-Content-Type"] == "nsq; version=1.0" do
-      Poison.decode!(body)
+    maybe_header = Enum.find(headers, {"", ""}, fn
+      {str, _val} -> str == "x-nsq-content-type"
+      _ -> false
+    end)
+
+    if elem(maybe_header, 1) == "nsq; version=1.0" do
+      @json.decode!(body)
       |> normalize_response
     else
       %{status_code: 200, status_txt: "OK", data: body}

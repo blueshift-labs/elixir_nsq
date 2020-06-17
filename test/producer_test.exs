@@ -1,5 +1,6 @@
 defmodule NSQ.ProducerTest do
   use ExUnit.Case, async: true
+  @http Application.get_env(:elixir_nsq, :http_module)
   doctest NSQ.Producer
 
   @test_topic "__nsq_producer_test_topic__"
@@ -8,10 +9,10 @@ defmodule NSQ.ProducerTest do
 
   setup do
     Logger.configure(level: :warn)
-    HTTPotion.post("http://127.0.0.1:6751/topic/delete?topic=#{@test_topic}")
-    HTTPotion.post("http://127.0.0.1:6761/topic/delete?topic=#{@test_topic}")
-    HTTPotion.post("http://127.0.0.1:6771/topic/delete?topic=#{@test_topic}")
-    HTTPotion.post("http://127.0.0.1:6781/topic/delete?topic=#{@test_topic}")
+    @http.post("http://127.0.0.1:6751/topic/delete?topic=#{@test_topic}")
+    @http.post("http://127.0.0.1:6761/topic/delete?topic=#{@test_topic}")
+    @http.post("http://127.0.0.1:6771/topic/delete?topic=#{@test_topic}")
+    @http.post("http://127.0.0.1:6781/topic/delete?topic=#{@test_topic}")
     :ok
   end
 
