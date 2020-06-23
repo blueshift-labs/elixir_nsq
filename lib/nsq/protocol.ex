@@ -1,5 +1,5 @@
 defmodule NSQ.Protocol do
-  @json Application.get_env(:elixir_nsq, :json_module)
+  @json Application.get_env(:elixir_nsq, :json_module, NSQ.Client.Jason)
 
   @valid_topic_channel_name_regex ~r/^[\.a-zA-Z0-9_-]+(#ephemeral)?$/
   @frame_type_response <<0 :: size(32)>>

@@ -1,6 +1,6 @@
 defmodule NSQ.Lookupd do
-  @json Application.get_env(:elixir_nsq, :json_module)
-  @http Application.get_env(:elixir_nsq, :http_module)
+  @json Application.get_env(:elixir_nsq, :json_module, NSQ.Client.Jason)
+  @http Application.get_env(:elixir_nsq, :http_module, NSQ.Client.Mojito)
   alias NSQ.Connection, as: C
   require Logger
 

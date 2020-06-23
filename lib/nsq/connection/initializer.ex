@@ -3,9 +3,9 @@ defmodule NSQ.Connection.Initializer do
   alias NSQ.Connection.MessageHandling
   alias NSQ.Connection.Buffer
   alias NSQ.ConnInfo
-  import NSQ.Protocol
+  alias NSQ.Protocol
   require Logger
-  @json Application.get_env(:elixir_nsq, :json_module)
+  @json Application.get_env(:elixir_nsq, :json_module, NSQ.Client.Jason)
 
   @socket_opts [as: :binary, mode: :passive, packet: :raw]
 
@@ -79,14 +79,14 @@ defmodule NSQ.Connection.Initializer do
   @spec send_magic_v2(C.state) :: :ok
   defp send_magic_v2(conn_state) do
     Logger.debug("(#{inspect self()}) sending magic v2...")
-    conn_state |> Buffer.send!(encode(:magic_v2))
+    conn_state |> Buffer.send!(Protocol.encode(:magic_v2))
   end
 
 
   @spec identify(C.state) :: {:ok, binary}
   defp identify(conn_state) do
     Logger.debug("(#{inspect self()}) identifying...")
-    identify_obj = encode({:identify, identify_props(conn_state)})
+    identify_obj = Protocol.encode({:identify, identify_props(conn_state)})
     conn_state |> Buffer.send!(identify_obj)
     {:response, json} = recv_nsq_response(conn_state)
     {:ok, _conn_state} = update_from_identify_response(conn_state, json)
@@ -167,7 +167,7 @@ defmodule NSQ.Connection.Initializer do
 
     if parsed["auth_required"] == true do
       Logger.debug "sending AUTH"
-      auth_cmd = encode({:auth, conn_state.config.auth_secret})
+      auth_cmd = Protocol.encode({:auth, conn_state.config.auth_secret})
       conn_state |> Buffer.send!(auth_cmd)
       {:response, json} = recv_nsq_response(conn_state)
       Logger.debug(json)
@@ -189,7 +189,7 @@ defmodule NSQ.Connection.Initializer do
   @spec subscribe(C.state) :: {:ok, binary}
   defp subscribe(%{topic: topic, channel: channel} = conn_state) do
     Logger.debug "(#{inspect self()}) subscribe to #{topic} #{channel}"
-    conn_state |> Buffer.send!(encode({:sub, topic, channel}))
+    conn_state |> Buffer.send!(Protocol.encode({:sub, topic, channel}))
 
     Logger.debug "(#{inspect self()}) wait for subscription acknowledgment"
     conn_state |> wait_for_ok!
@@ -200,12 +200,12 @@ defmodule NSQ.Connection.Initializer do
   defp recv_nsq_response(conn_state) do
     <<msg_size :: size(32)>> = conn_state |> Buffer.recv!(4)
     raw_msg_data = conn_state |> Buffer.recv!(msg_size)
-    {:response, _response} = decode(raw_msg_data)
+    {:response, _response} = Protocol.decode(raw_msg_data)
   end
 
 
   defp wait_for_ok!(state) do
-    expected = ok_msg()
+    expected = Protocol.ok_msg()
     ^expected = state |> Buffer.recv!(byte_size(expected))
   end
 

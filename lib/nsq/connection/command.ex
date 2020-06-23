@@ -9,7 +9,7 @@ defmodule NSQ.Connection.Command do
   alias NSQ.Connection, as: C
   alias NSQ.Connection.Buffer
   alias NSQ.ConnInfo
-  import NSQ.Protocol
+  alias NSQ.Protocol
 
 
   def exec(state, cmd, kind, {_, ref} = from) do
@@ -28,7 +28,7 @@ defmodule NSQ.Connection.Command do
 
   @spec send_data_and_queue_resp(C.state, tuple, {reference, pid}, atom) :: C.state
   def send_data_and_queue_resp(state, cmd, from, kind) do
-    state |> Buffer.send!(encode(cmd))
+    state |> Buffer.send!(Protocol.encode(cmd))
     if kind == :noresponse do
       state
     else

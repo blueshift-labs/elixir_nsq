@@ -3,8 +3,8 @@ defmodule NSQ.Message do
   # Directives                                              #
   # ------------------------------------------------------- #
   require Logger
-  import NSQ.Protocol
   alias NSQ.Connection.Buffer
+  alias NSQ.Protocol
   use GenServer
 
 
@@ -58,7 +58,7 @@ defmodule NSQ.Message do
   parsed data.
   """
   def from_data(data) do
-    {:ok, message} = decode_as_message(data)
+    {:ok, message} = Protocol.decode_as_message(data)
     Map.merge(%NSQ.Message{}, message)
   end
 
@@ -96,7 +96,7 @@ defmodule NSQ.Message do
   """
   def fin(message) do
     Logger.debug("(#{inspect message.connection}) fin msg ID #{message.id}")
-    message |> Buffer.send!(encode({:fin, message.id}))
+    message |> Buffer.send!(Protocol.encode({:fin, message.id}))
     GenEvent.notify(message.event_manager_pid, {:message_finished, message})
     GenServer.call(message.consumer, {:start_stop_continue_backoff, :resume})
   end
@@ -136,7 +136,7 @@ defmodule NSQ.Message do
       GenServer.call(message.consumer, {:start_stop_continue_backoff, :continue})
     end
 
-    message |> Buffer.send!(encode({:req, message.id, delay}))
+    message |> Buffer.send!(Protocol.encode({:req, message.id, delay}))
     GenEvent.notify(message.event_manager_pid, {:message_requeued, message})
   end
 
@@ -148,7 +148,7 @@ defmodule NSQ.Message do
   """
   def touch(message) do
     Logger.debug("(#{inspect message.connection}) touch msg ID #{message.id}")
-    message |> Buffer.send!(encode({:touch, message.id}))
+    message |> Buffer.send!(Protocol.encode({:touch, message.id}))
     send(message.parent, {:message_touch, message})
   end
 

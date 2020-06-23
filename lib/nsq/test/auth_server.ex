@@ -1,5 +1,5 @@
 defmodule NSQ.Test.AuthServer do
-  @json Application.get_env(:elixir_nsq, :json_module)
+  @json Application.get_env(:elixir_nsq, :json_module, NSQ.Client.Jason)
 
   # This sets up an auth server for NSQD (run from Procfile) so that we can
   # test auth properly.

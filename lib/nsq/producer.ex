@@ -44,7 +44,7 @@ defmodule NSQ.Producer do
   # Directives                                              #
   # ------------------------------------------------------- #
   require Logger
-  import NSQ.Protocol
+  alias NSQ.Protocol
   use GenServer
 
 
@@ -147,7 +147,7 @@ defmodule NSQ.Producer do
   def start_link(topic, config, genserver_options \\ []) do
     {:ok, config} = NSQ.Config.validate(config || %NSQ.Config{})
     {:ok, config} = NSQ.Config.normalize(config)
-    unless is_valid_topic_name?(topic), do: raise "Invalid topic name #{topic}"
+    unless Protocol.is_valid_topic_name?(topic), do: raise "Invalid topic name #{topic}"
     state = %{@initial_state | topic: topic, config: config}
     GenServer.start_link(__MODULE__, state, genserver_options)
   end

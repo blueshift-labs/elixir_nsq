@@ -17,7 +17,7 @@ defmodule NSQ.ConsumerTest do
   alias NSQ.ConnInfo
   require Logger
 
-  @http Application.get_env(:elixir_nsq, :http_module)
+  @http Application.get_env(:elixir_nsq, :http_module, NSQ.Client.Mojito)
   @test_topic "__nsq_consumer_test_topic__"
   @test_channel1 "__nsq_consumer_test_channel1__"
 

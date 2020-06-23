@@ -80,12 +80,12 @@ defmodule NSQ.Consumer do
   # ------------------------------------------------------- #
   use GenServer
   require Logger
-  import NSQ.Protocol
   import NSQ.Consumer.Helpers
   alias NSQ.Consumer.Backoff
   alias NSQ.Consumer.Connections
   alias NSQ.Consumer.RDY
   alias NSQ.ConnInfo, as: ConnInfo
+  alias NSQ.Protocol
 
 
   # ------------------------------------------------------- #
@@ -140,8 +140,8 @@ defmodule NSQ.Consumer do
   def start_link(topic, channel, config, opts \\ []) do
     {:ok, config} = NSQ.Config.validate(config)
     {:ok, config} = NSQ.Config.normalize(config)
-    unless is_valid_topic_name?(topic), do: raise "Invalid topic name #{topic}"
-    unless is_valid_channel_name?(channel), do: raise "Invalid channel name #{channel}"
+    unless Protocol.is_valid_topic_name?(topic), do: raise "Invalid topic name #{topic}"
+    unless Protocol.is_valid_channel_name?(channel), do: raise "Invalid channel name #{channel}"
 
     state = %{@initial_state |
       topic: topic,

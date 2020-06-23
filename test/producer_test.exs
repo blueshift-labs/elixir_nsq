@@ -1,6 +1,6 @@
 defmodule NSQ.ProducerTest do
   use ExUnit.Case, async: true
-  @http Application.get_env(:elixir_nsq, :http_module)
+  @http Application.get_env(:elixir_nsq, :http_module, NSQ.Client.Mojito)
   doctest NSQ.Producer
 
   @test_topic "__nsq_producer_test_topic__"

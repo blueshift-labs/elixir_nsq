@@ -3,7 +3,7 @@ defmodule NSQ.Connection.MessageHandling do
   alias NSQ.ConnInfo
   alias NSQ.Connection.Buffer
   alias NSQ.Connection.Command
-  import NSQ.Protocol
+  alias NSQ.Protocol
   require Logger
 
 
@@ -23,7 +23,7 @@ defmodule NSQ.Connection.MessageHandling do
         # received data on the socket to get the size of this message, so if we
         # timeout in here, that's probably indicative of a problem.
         raw_msg_data = conn_state |> Buffer.recv!(msg_size)
-        decoded = decode(raw_msg_data)
+        decoded = Protocol.decode(raw_msg_data)
         :ok = GenServer.call(conn, {:nsq_msg, decoded})
         conn_state |> recv_nsq_messages(conn)
     end
@@ -87,7 +87,7 @@ defmodule NSQ.Connection.MessageHandling do
   @spec respond_to_heartbeat(C.state) :: :ok
   defp respond_to_heartbeat(state) do
     GenEvent.notify(state.event_manager_pid, :heartbeat)
-    state |> Buffer.send!(encode(:noop))
+    state |> Buffer.send!(Protocol.encode(:noop))
   end
 
 
